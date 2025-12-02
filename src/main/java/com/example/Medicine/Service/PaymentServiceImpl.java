@@ -2,7 +2,6 @@ package com.example.Medicine.Service;
 
 import org.springframework.stereotype.Service;
 
-import com.example.Medicine.Azure.AzureAIService;
 import com.example.Medicine.Mapper.PaymentMapper;
 import com.example.Medicine.Model.Discount;
 import com.example.Medicine.Model.Payment;
@@ -24,24 +23,11 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMethodRepository paymentMethodRepository;
     private final DiscountRepository discountRepository;
 
-    // Azure Cognitive Service
-    private final AzureAIService aiService;
-
     // ============================================================
     // CREATE
     // ============================================================
     @Override
     public PaymentResponse create(PaymentRequest request) {
-
-        // IA opcional (no falla si Azure no funciona)
-        try {
-            var ai = aiService.analyzeText(
-                    "Creando pago. Monto: " + request.getAmount()
-            );
-            System.out.println("⛅ Resultado IA (CREATE): " + ai.toPrettyString());
-        } catch (Exception e) {
-            System.out.println("⚠️ Error IA (CREATE): " + e.getMessage());
-        }
 
         // Obtener método de pago
         PaymentMethod method = paymentMethodRepository.findById(request.getPaymentMethodId())
@@ -76,16 +62,6 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found: " + id));
 
-        // IA opcional
-        try {
-            var ai = aiService.analyzeText(
-                    "Consulta del pago con ID " + id + " por monto " + payment.getAmount()
-            );
-            System.out.println("⛅ Resultado IA (GET): " + ai.toPrettyString());
-        } catch (Exception e) {
-            System.out.println("⚠️ Error IA (GET): " + e.getMessage());
-        }
-
         return PaymentMapper.toResponse(payment);
     }
 
@@ -97,16 +73,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment payment = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found: " + id));
-
-        // IA opcional
-        try {
-            var ai = aiService.analyzeText(
-                    "Actualizando pago con ID " + id + " nuevo monto: " + req.getAmount()
-            );
-            System.out.println("⛅ Resultado IA (UPDATE): " + ai.toPrettyString());
-        } catch (Exception e) {
-            System.out.println("⚠️ Error IA (UPDATE): " + e.getMessage());
-        }
 
         // Actualizar monto
         payment.setAmount(req.getAmount());
