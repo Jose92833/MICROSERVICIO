@@ -16,13 +16,18 @@ COPY ./src src/
 RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw package -DskipTests
 
+
+# =============================
+#  RUNTIME
+# =============================
 FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
 COPY --from=build /build/target/*.jar app.jar
 
+# Render asignará dinámicamente el puerto con $PORT
 ENV PORT=8080
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar"]
